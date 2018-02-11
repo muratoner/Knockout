@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Knockout Test Index</title>
+
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../styles/prism.css">
+	<link rel="stylesheet" href="../styles/style.css">
+	
+	<script src="//cdn.jsdelivr.net/combine/npm/jquery@3.3.1,npm/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js,npm/knockout@3.5.0-beta"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+	    crossorigin="anonymous"></script>
+	<script src="../scripts/prism.js"></script>
+</head>
+
+<body class="container">
+	<h1>List - Collection</h1>
+	<div class="list-group">
+		<a href="../index.html" class="list-group-item list-group-item-action">
+			Ana Sayfa
+		</a>
+		<a href="../common_process/common_process.html" class="list-group-item list-group-item-action">
+			Temel İşlemler
+		</a>
+		<a href="../list_collection/list_collection.html" class="list-group-item list-group-item-action">
+			Liste ve Koleksiyon İşlemleri
+		</a>
+	</div>
+	<hr />
+	<h2>Başlangıç - Getting Started</h2>
+	<p align="justify">
+		Liste ve Koleksiyon işlemleri için kullanacağımız Knockout nesnesi ko.observableArray fonksiyonudur bu fonksiyon sayesinde çift yönlü bağlama işlemi yapabiliyor olacağız. Array türünde listelerinizi html tarafında döngüye sokmak için <code>data-bind="foreach: array"</code> şeklinde bir kod kullanarak döngü kurabilirsiniz. Eğer array nesneleriniz primitive türde nesneler ise örnek olarak sadece string veriden oluşan elemanların yer aldığı bir array'iniz var ise erişebileceğiniz bir özellik olmayacağı için <code>$data</code> keyword'ünü kullanarak primitive türde array elemanlarına erişebilirsiniz. 
+	</p>
+
+	<pre class="line-numbers">
+		<code class="language-html">
+			&#x3C;ul class=&#x22;list-group&#x22; data-bind=&#x22;foreach: seats&#x22;&#x3E;
+			&#x9;&#x3C;li class=&#x22;list-group-item d-flex justify-content-between align-items-center&#x22;&#x3E;
+			&#x9;&#x9;&#x3C;span data-bind=&#x22;text: name&#x22;&#x3E;&#x3C;/span&#x3E;
+			&#x9;&#x9;&#x3C;select class=&#x22;form-control&#x22; 
+							data-bind=&#x22;options: $root.availableMeals, value: meal, optionsText: &#x27;mealName&#x27;&#x22;&#x3E;&#x3C;/select&#x3E;
+			&#x9;&#x9;&#x3C;span class=&#x22;badge badge-primary badge-pill&#x22; data-bind=&#x22;text: meal().price&#x22;&#x3E;&#x3C;/span&#x3E;
+			&#x9;&#x3C;/li&#x3E;
+			&#x3C;/ul&#x3E;
+			&#x3C;br&#x3E;
+			&#x3C;input type=&#x22;text&#x22; class=&#x22;form-control&#x22; data-bind=&#x22;value: passengerName&#x22;&#x3E;
+			&#x3C;br&#x3E;
+			&#x3C;button class=&#x22;btn btn-primary&#x22; data-bind=&#x22;click: addSeat&#x22;&#x3E;Ekle&#x3C;/button&#x3E;
+		</code>
+	</pre>
+
+	<blockquote align=justify>
+		Üstteki kod bloğunda göreceğiniz gibi foreach'in tanımlı olduğu etiketler arasında erişmeye çalıştığınız her bir nesne sistem tarafından foreach döngüsündeki her bir eleman içerisinde yer alan özellikmiş gibi davranıp foreach elemanı içerisinde sizin tanımladığınız özelliği aramaya çalışacaktır örnek vermek gerekirse ilk defa bir özelliğe erişmek için özellik başına <code>$root.</code> şeklinde bir ön ek ekledik. Kullandığımız yer ise <code>data-bind="options: $root.availableMeals ..."</code> kısmıdır burada şu denilmektedir <code>availableMeals</code> özelliği foreach elemanı içerisinden erişebileceğin bir özellik değil AppViewModelListCollection sınıfımız içerisinde tanımlı olan bir özellik olduğunu <code>$root.</code> eki ile söylüyoruz böylelikle <code>availableMeals</code> özelliğine AppViewModelListCollection sınıfı içerisinden erişiyor.
+	</blockquote>
+
+	<pre class="line-numbers">
+		<code class="language-typescript">
+			// Her bir koltuk rezervasyonu için kullanılabilecek sınıf.
+			class SeatReservation {
+				meal: KnockoutObservable<string>
+				constructor(public name, public initialMeal) {
+					this.meal = ko.observable(initialMeal)
+				}
+			}
+			
+			class AppViewModelListCollection {
+				availableMeals: Array<{mealName: string, price: number}>
+				seats: KnockoutObservableArray<SeatReservation>
+				passengerName = ko.observable('')
+			
+				constructor() {
+					// Düzenlenmeyen veri - Sunucudan gelecek veri olduğunu varsayalım.
+					this.availableMeals = [
+						{ mealName: "Standard (sandwich)", price: 0 },
+						{ mealName: "Premium (lobster)", price: 34.95 },
+						{ mealName: "Ultimate (whole zebra)", price: 290 }
+					];
+				
+					// Düzenlenebilir Veri
+					this.seats = ko.observableArray([
+						new SeatReservation("Murat", this.availableMeals[0]),
+						new SeatReservation("Sakine", this.availableMeals[1]),
+						new SeatReservation("Ramazan", this.availableMeals[2])
+					]);
+				}
+				
+				addSeat = () => {
+					this.seats.push(new SeatReservation(this.passengerName(), this.availableMeals[0]))
+					this.passengerName('')
+				}
+			}
+			
+			ko.applyBindings(new AppViewModelListCollection(), document.getElementById('getting-started'))
+		</code>
+	</pre>
+	<div id="getting-started">
+		<ul class="list-group" data-bind="foreach: seats">
+			<li class="list-group-item d-flex justify-content-between align-items-center">
+				<span data-bind="text: name"></span>
+				<select class="form-control" data-bind="options: $root.availableMeals, value: meal, optionsText: 'mealName'"></select>
+				<span class="badge badge-primary badge-pill" data-bind="text: meal().price"></span>
+			</li>
+		</ul>
+		<br>
+		<input type="text" class="form-control" data-bind="value: passengerName">
+		<br>
+		<button class="btn btn-primary" data-bind="click: addSeat">Ekle</button>
+	</div>
+	<script src="./list_collection.js"></script>
+</body>
+
+</html>

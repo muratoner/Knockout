@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Knockout Test Index</title>
+
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="../styles/prism.css">
+	<link rel="stylesheet" href="../styles/style.css">
+
+	<script src="//cdn.jsdelivr.net/combine/npm/jquery@3.3.1,npm/bootstrap@4.0.0/dist/js/bootstrap.bundle.min.js,npm/knockout@3.5.0-beta"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+	    crossorigin="anonymous"></script>
+	<script src="../scripts/prism.js"></script>
+</head>
+
+<body class="container" style="margin-bottom: 25px">
+	<h1>Common Process!</h1>
+	<div class="list-group">
+		<a href="../index.html" class="list-group-item list-group-item-action">
+			Ana Sayfa
+		</a>
+		<a href="../common_process/common_process.html" class="list-group-item list-group-item-action">
+			Temel İşlemler
+		</a>
+		<a href="../list_collection/list_collection.html" class="list-group-item list-group-item-action">
+			Liste ve Koleksiyon İşlemleri
+		</a>
+	</div>
+	<hr />
+	<h2>Tek Seferlik Bağlama - One Time Binding</h2>
+	<div id="one-time-binding">
+		<p align="justify">Tüm dom elementleri javascript'de dom elementlerindede göreceğimiz üzere innerText özelliğine sahiptir ve bu innerText
+			özelliğini değiştirerek dom elementlerinin metinsel değerlerini değiştirebiliriz. Alttaki örnekde göreceğiniz üzere data-bind
+			özelliği içinde text özelliğine knockout observable nesnelerimiz olan firstName ve lastName'i referans olarak veriyoruz
+			ve mvvm doğası gereği two way binding ile yani hem javascript hemde html tarafında yapılacak değişiklik ile her iki tarafta
+			anlık değişikliğin yansımasını görebileceğiz.</p>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				function AppViewModelOneTimeBinding(){
+					this.firstName = "Murat";
+					this.lastName = "Öner";
+				
+					setTimeout(() => {
+						console.log(`one way binding ile değiştireceğim ad ${this.firstName}`)
+						this.firstName = "Sakine"
+						console.log(`one way binding ile değiştirilen ad ${this.firstName}`)
+					}, 3000);
+				}
+				
+				ko.applyBindings(new AppViewModelOneTimeBinding(), document.getElementById('one-time-binding'));
+			</code>
+		</pre>
+
+		<q>
+			Bu şekilde bir kullanım tek seferlik değer ayarlama işlemleri için geçerlidir eğer input nesnelerinde ad ve soyadı değiştirirseniz
+			sonuç kısmında bir değişiklik olmadığını göreceksiniz buda mvvm mantığının diğer bir adıyla two way binding'in çalışmadığı
+			anlamına geliyor eğer bu şekilde bir mekanizme kullanmak isterseniz
+			<code>ko.observable(deger);</code> fonksiyonunu kullanmalısınız
+		</q>
+
+		<form>
+			<div class="form-group">
+				<label>Ad</label>
+				<input type="text" class="form-control" data-bind="value: firstName" placeholder="Adınız">
+			</div>
+			<div class="form-group">
+				<label>Soyad</label>
+				<input type="text" class="form-control" data-bind="value: lastName" placeholder="Soyadınız">
+			</div>
+		</form>
+
+		<h3>Sonuç</h3>
+		<hr>
+		<label>Adınız:
+			<strong data-bind="text: firstName"></strong>
+		</label>
+		<label>Soyadınız:
+			<strong data-bind="text: lastName"></strong>
+		</label>
+	</div>
+	<hr>
+	<h2>Çift Yollu Bağlama - Two Way Binding</h2>
+	<div id="two-way-binding">
+		<p align="justify">One time binding'i bir üst başlıkta ele aldık ve tek seferlik bağlama sonrası herhangi bir şekilde javascript yada html
+			tarafında yaptınız değişliğinin firstName ve lastName özelliklerine bir etki etmediğini gördük fakat two way binding diye
+			adlandırdığınız bu başlık altında
+			<code>ko.observable(deger);</code> fonksiyonunu kullanarak bir gözlemci oluşturuyoruz ve gözlemciye ilk değeri veriyoruz bu
+			gözlemci hem html tarafında hemde javascript tarafındaki değişikliği gözlemleyip firstName ve lastName değişikliklerimize
+			direkt olarak uyguluyor ve yansımalarını değişkenleri kullandığımız her yerden görebiliyoruz.</p>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				function AppViewModelTwoTimeBinding(){
+					this.firstName = ko.observable("Murat");
+					this.lastName = ko.observable("Öner");
+				
+					setTimeout(() => {
+						console.log(`two way binding ile değiştireceğim ad ${this.firstName}`)
+						this.firstName("Sakine")
+						console.log(`two way binding ile değiştirilen ad ${this.firstName}`)
+					}, 3000);
+				}
+				
+				ko.applyBindings(new AppViewModelTwoTimeBinding(), document.getElementById('two-time-binding'));
+			</code>
+		</pre>
+
+		<q>
+			One time binding kısmında setTimeout fonksiyonunu kullandık ve 3000 saniye sonra firstName değerini Sakine olarak değiştirdik
+			fakat sayfada yer alan 2 yansımasında değişiklik olmadığını gördük fakat bu başlık altında ko.observable(deger); fonksiyonunu
+			kullanarak her bir özelliğimiz için gözlemci atadık ve bu gözlemciler javascrip tarafında yada html tarafındaki değişiklikleri
+			gözlemleyip yansımalarına ilgili değişikliği anlık olarak yansıtıyor. Bir altta yer alan Ad input alanında ve
+			<a href="#two-way-binding-result">Sonuç</a> kısmında göreceğiniz üzere Adınız: yazan kısımın yanında Murat yazıyor ve 3 saniye sonra javascript tarafında
+			<code>ko.observable("Sakine");</code> kodumuz çalışınca bu kısmında değiştiğiniz görebiliyoruz.
+		</q>
+
+		<form>
+			<div class="form-group">
+				<label>Ad</label>
+				<input type="text" class="form-control" data-bind="value: firstName" placeholder="Adınız">
+			</div>
+			<div class="form-group">
+				<label>Soyad</label>
+				<input type="text" class="form-control" data-bind="value: lastName" placeholder="Soyadınız">
+			</div>
+		</form>
+
+		<h3 id="two-way-binding-result">Sonuç</h3>
+		<label>Adınız:
+			<strong data-bind="text: firstName"></strong>
+		</label>
+		<label>Soyadınız:
+			<strong data-bind="text: lastName"></strong>
+		</label>
+	</div>
+	<hr>
+	<h2>Computed Properties - Hesaplanmış Özellikler</h2>
+	<div id="computed-properties">
+		<p align="justify">Çok sık olarak programlamada bazı değerleri birleştirip gösterme( Ad + Soyad v.b.) yada bazı matematiksel hesaplamalar
+			yapıp bu çıktıyı vermeniz gerekebilir bu işide üzerinde hesaplama, birleştirme v.b. işlemler yaptığınız özelliklerde oluşacak
+			değişiklik sonrası tekrar hesaplamanın yapılıp çıktıyı hemen anlık almanız gereken durumunda sıklıkla kullanacağınız bir
+			özellikdir.
+		</p>
+
+		<p align="justify">Yapacağımız işlem çok basit olarak üstteki başıkların devamı olarak ad soyad üzerinden gidersek ad + soyad birleştirip
+			tek bir özellik kullanarak html içerisinde gösterimini sağlayalım.</p>
+
+		<pre class="line-numbers">
+	<code class="language-typescript">
+		function AppViewModelComputed(){
+			this.firstName = ko.observable("Murat");
+			this.lastName = ko.observable("Öner");
+		
+			this.fullName = ko.computed(() => {
+				return `${this.firstName()} ${this.lastName()}`;
+			})
+		}
+		
+		ko.applyBindings(new AppViewModelComputed(), document.getElementById("computed-properties"))
+	</code>
+</pre>
+
+		<q>
+			Üst başlıktaki örneklerimizden tek farkı
+			<code>ko.computed(callBackFunction);</code> şeklinde bir kod bloğu kullandığımızı görüyoruz ve bu kod bloğu çıktısınıda fullName
+			adlı özelliğimize aktarıyoruz sadece bu özelliği html içerisinde kullanıp ad soya birleşimi gösterebiliriz kolayca ve
+			ad, soyad özelliklerinde oluşacak bir değişiklik sonrası bu yansımayada anlık olarak değişiklik yansıtılacaktır. Html
+			tarafında kullanımı ise
+			<code>data-bind="text: lastName"</code> şeklinde olacak firstName ve lastName'den kullanım açısından hiçbir farkı yoktur.
+		</q>
+
+		<form>
+			<div class="form-group">
+				<label>Ad</label>
+				<input type="text" class="form-control" data-bind="value: firstName" placeholder="Adınız">
+			</div>
+			<div class="form-group">
+				<label>Soyad</label>
+				<input type="text" class="form-control" data-bind="value: lastName" placeholder="Soyadınız">
+			</div>
+		</form>
+
+		<h3 id="two-way-binding-result">Sonuç</h3>
+		<label>Tam Adınız:
+			<strong data-bind="text: fullName"></strong>
+		</label>
+	</div>
+	<hr>
+	<h2>Behavior - Davranış</h2>
+	<div id="behavior">
+		<p>
+			Aslında normal fonksiyon tanımlayıp bu fonksiyonun onlick event'i ile tetiklenmesinden bir farkı yoktur Knockout tarafında
+			kullanımı ise çok basit olarak şu şekildedir
+			<code>data-bind="click: functionName"</code>. Hemen Üst başlıktaki adsoyad örneklerimizden yola çıkalım senaryomuz şu şekilde
+			varsayılan olarak Murat Öner ad soyadı ile oluşturduğumuz değerlerin tümünün büyük harfe çevrimesini sağlayalım.
+		</p>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				function AppViewModelComputed(){
+					this.firstName = ko.observable("Murat");
+					this.lastName = ko.observable("Öner");
+				
+					this.fullName = ko.computed(() => {
+						return `${this.firstName()} ${this.lastName()}`;
+					})
+				}
+				
+				ko.applyBindings(new AppViewModelComputed(), document.getElementById("computed-properties"))
+			</code>
+		</pre>
+
+		<form>
+			<div class="form-group">
+				<label>Ad</label>
+				<input type="text" class="form-control" data-bind="value: firstName" placeholder="Adınız">
+			</div>
+			<div class="form-group">
+				<label>Soyad</label>
+				<input type="text" class="form-control" data-bind="value: lastName" placeholder="Soyadınız">
+			</div>
+
+			<button class="btn btn-primary" data-bind="click: capitalize">Büyük Harfe Dönüştür</button>
+			<button class="btn btn-primary" data-bind="click: lower">Küçük Harfe Dönüştür</button>
+		</form>
+
+		<h3 id="two-way-binding-result">Sonuç</h3>
+		<label>Tam Adınız:
+			<strong data-bind="text: fullName"></strong>
+		</label>
+	</div>
+	<hr>
+	<h2>Visible & Checked</h2>
+	<div id="visible-checked">
+		<pre class="line-numbers">
+			<code class="language-html">
+				&#x3C;p data-bind=&#x22;visible: showed&#x22;&#x3E;Bu k&#x131;s&#x131;m alttaki checkbox i&#x15F;aretli oldu&#x11F;unda g&#xF6;sterilir.&#x3C;/p&#x3E;
+				&#x3C;input type=&#x22;checkbox&#x22; data-bind=&#x22;checked:showed&#x22;&#x3E;
+			</code>
+		</pre>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				class AppViewModelVisibleChecked {
+					constructor(public showed = ko.observable(false)) {
+						
+					}
+				}
+				
+				ko.applyBindings(new AppViewModelVisibleChecked(), document.getElementById("visible-checked"))
+			</code>
+		</pre>
+
+		<p data-bind="visible: showed">Bu kısım alttaki checkbox işaretli olduğunda gösterilir.</p>
+		<input type="checkbox" data-bind="checked:showed">
+	</div>
+	<hr>
+	<h2>If & Enable</h2>
+	<div id="if-enable">
+		<pre class="line-numbers">
+			<code class="language-html">
+				&#x3C;p data-bind=&#x22;if: name().length === 0&#x22;&#x3E;L&#xFC;tfen alt k&#x131;sma Ad Soyad giriniz.&#x3C;/p&#x3E;
+				&#x3C;input type=&#x22;text&#x22; class=&#x22;form-control&#x22; placeholder=&#x22;Ad Soyad Giriniz.&#x22; data-bind=&#x22;value: name&#x22;&#x3E;
+				&#x3C;br&#x3E;
+				&#x3C;button data-bind=&#x22;enable: name()&#x22; class=&#x22;btn btn-primary&#x22;&#x3E;Kaydet&#x3C;/button&#x3E;
+			</code>
+		</pre>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				class AppViewModelIfEnable {
+					constructor(public name = ko.observable('')) {
+						
+					}
+				}
+				
+				ko.applyBindings(new AppViewModelIfEnable(), document.getElementById("if-enable"))
+			</code>
+		</pre>
+
+		<p data-bind="if: name().length === 0">Lütfen alt kısma Ad Soyad giriniz.</p>
+		<input type="text" class="form-control" placeholder="Ad Soyad Giriniz." data-bind="value: name">
+		<br>
+		<button data-bind="enable: name()" class="btn btn-primary">Kaydet</button>
+	</div>
+	<hr>
+	<h2>Css</h2>
+	<div id="css">
+		<pre class="line-numbers">
+			<code class="language-html">
+				&#x3C;select class=&#x22;form-control&#x22; 
+						data-bind=&#x22;options: [&#x27;btn-primary&#x27;, &#x27;btn-danger&#x27;, &#x27;btn-default&#x27;], value: className, optionText: &#x27;$data&#x27;&#x22;&#x3E;
+				&#x3C;/select&#x3E;
+				&#x3C;br&#x3E;
+				&#x3C;button data-bind=&#x22;css: className&#x22; class=&#x22;btn btn-primary&#x22;&#x3E;Kaydet&#x3C;/button&#x3E;
+			</code>
+		</pre>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				class AppViewModelCss {
+					constructor(public className = ko.observable('')) {
+						
+					}
+				}
+				
+				ko.applyBindings(new AppViewModelCss(), document.getElementById("css"))
+			</code>
+		</pre>
+
+		<select class="form-control" data-bind="options: ['btn-primary', 'btn-danger', 'btn-default'], value: className, optionText: '$data'"></select>
+		<br>
+		<button data-bind="css: className" class="btn btn-primary">Kaydet</button>
+	</div>
+	<hr>
+	<h2>With</h2>
+	<div id="with">
+		<p align="justify">
+			With özelliğini VB.NET'de geliştirme yaparken çok sık kullanıyordum ve değişken isimlerini sürekli yazmamak için tek sefer with tanımlamasına ilgili objeyi verip with tanımlamasının blok kapsamasında objeye ait özelliklere erişebiliyoruz kısa ve kolay bir şekilde.
+		</p>
+		<pre class="line-numbers">
+			<code class="language-html">
+				&#x3C;div data-bind=&#x22;with: model&#x22;&#x3E;
+				&#x9;&#x3C;ul data-bind=&#x22;foreach: countries&#x22;&#x3E;
+				&#x9;&#x9;&#x3C;li&#x3E;
+				&#x9;&#x9;&#x9;&#x3C;span data-bind=&#x22;text: name&#x22;&#x3E;&#x3C;/span&#x3E;
+				&#x9;&#x9;&#x9;&#x3C;ul data-bind=&#x22;with: detail&#x22;&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x3C;li&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x9;&#x3C;span&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x3C;strong&#x3E;N&#xFC;fus:&#x3C;/strong&#x3E; &#x3C;span data-bind=&#x22;text: population&#x22;&#x3E;&#x3C;/span&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x9;&#x3C;/span&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x9;&#x3C;span&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x3C;strong&#x3E;Kod:&#x3C;/strong&#x3E; &#x3C;span data-bind=&#x22;text: code&#x22;&#x3E;&#x3C;/span&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x9;&#x3C;/span&#x3E;
+				&#x9;&#x9;&#x9;&#x9;&#x3C;/li&#x3E;
+				&#x9;&#x9;&#x9;&#x3C;/ul&#x3E;
+				&#x9;&#x9;&#x3C;/li&#x3E;
+				&#x9;&#x3C;/ul&#x3E;
+				&#x3C;/div&#x3E;
+			</code>
+		</pre>
+
+		<pre class="line-numbers">
+			<code class="language-typescript">
+				class AppViewModelWith {
+					model: any
+					constructor() {
+						this.model = {
+							countries: [
+								{
+									name: 'Turkey',
+									detail: {
+										population: 49856,
+										code: 'TR'
+									}
+								}
+							]
+						}
+					}
+				}
+				
+				ko.applyBindings(new AppViewModelWith(), document.getElementById("with"))
+			</code>
+		</pre>
+		<div data-bind="with: model">
+			<ul data-bind="foreach: countries">
+				<li>
+					<span data-bind="text: name"></span>
+					<ul data-bind="with: detail">
+						<li>
+							<span>
+								<strong>Nüfus:</strong> <span data-bind="text: population"></span>
+							</span>
+							<span>
+								<strong>Kod:</strong> <span data-bind="text: code"></span>
+							</span>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<hr>
+	<h2>Html</h2>
+	<div id="html">
+		<p>Html değerlerini render edilecek şekilde sayfada gösterebilmek için <code>data-bind="html: degisken";</code> şeklinde kullanımla html stringlerinizi render edebilirsiniz.</p>
+		<h3>Sonuç</h3>
+		<p data-bind="html: htmlStr"></p>
+	</div>
+	<script src="./common_process.js"></script>
+</body>
+
+</html>
