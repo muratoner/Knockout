@@ -1,3 +1,9 @@
+var Person = /** @class */ (function () {
+    function Person(name) {
+        this.name = name;
+    }
+    return Person;
+}());
 var Knockout;
 (function (Knockout) {
     var Index;
@@ -15,6 +21,8 @@ var Knockout;
                     console.log('fullName çalıştı');
                     return _this.firstName() + " " + _this.lastName();
                 });
+                var list = new Array(new Person('Murat'));
+                this.json = ko.toJSON(list);
             }
             return AppViewModel;
         }());
